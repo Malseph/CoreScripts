@@ -605,6 +605,7 @@ Methods.OnPlayerCellChange = function(pid)
             Players[pid].data.location.posZ = tes3mp.GetPreviousCellPosZ(pid)
             Players[pid]:LoadCell()
         end
+        Players[pid].stateSpam = {} --Reset state spam on cell change
     end
 end
 
