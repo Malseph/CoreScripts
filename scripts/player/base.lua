@@ -126,6 +126,10 @@ end
 function BasePlayer:FinishLogin()
     self.loggedIn = true
     if self.hasAccount ~= false then -- load account
+
+        --load dynamic records before adding custom spells and/or items
+        WorldInstance:LoadDynamicRecords(self.pid)
+
         self:SaveIpAddress()
         self:LoadCharacter()
         self:LoadClass()
@@ -473,20 +477,42 @@ function BasePlayer:SaveClass()
 end
 
 function BasePlayer:LoadStatsDynamic()
+    self:LoadBaseStatsDynamic(false)
+	self:LoadCurrentStatsDynamic(true)
+end
+
+function BasePlayer:LoadBaseStatsDynamic(send)
     tes3mp.SetHealthBase(self.pid, self.data.stats.healthBase)
     tes3mp.SetMagickaBase(self.pid, self.data.stats.magickaBase)
     tes3mp.SetFatigueBase(self.pid, self.data.stats.fatigueBase)
+	
+	if send == true then
+		tes3mp.SendStatsDynamic(self.pid)
+	end	
+end
+
+function BasePlayer:LoadCurrentStatsDynamic(send)
     tes3mp.SetHealthCurrent(self.pid, self.data.stats.healthCurrent)
     tes3mp.SetMagickaCurrent(self.pid, self.data.stats.magickaCurrent)
     tes3mp.SetFatigueCurrent(self.pid, self.data.stats.fatigueCurrent)
-
-    tes3mp.SendStatsDynamic(self.pid)
+	
+	if send == true then
+		tes3mp.SendStatsDynamic(self.pid)
+	end	
 end
 
-function BasePlayer:SaveStatsDynamic()
+function BasePlayer:SaveStatsDynamic() 
+    self:SaveBaseStatsDynamic()
+	self:SaveCurrentStatsDynamic()
+end
+
+function BasePlayer:SaveBaseStatsDynamic()
     self.data.stats.healthBase = tes3mp.GetHealthBase(self.pid)
     self.data.stats.magickaBase = tes3mp.GetMagickaBase(self.pid)
     self.data.stats.fatigueBase = tes3mp.GetFatigueBase(self.pid)
+end
+
+function BasePlayer:SaveCurrentStatsDynamic()
     self.data.stats.healthCurrent = tes3mp.GetHealthCurrent(self.pid)
     self.data.stats.magickaCurrent = tes3mp.GetMagickaCurrent(self.pid)
     self.data.stats.fatigueCurrent = tes3mp.GetFatigueCurrent(self.pid)
@@ -748,7 +774,11 @@ function BasePlayer:LoadInventory()
                     currentItem.enchantmentCharge = -1
                 end
 
-                tes3mp.AddItem(self.pid, currentItem.refId, currentItem.count, currentItem.charge, currentItem.enchantmentCharge)
+                if currentItem.soul == nil then
+                    currentItem.soul = ""
+                end
+
+                tes3mp.AddItem(self.pid, currentItem.refId, currentItem.count, currentItem.charge, currentItem.enchantmentCharge, currentItem.soul)
             end
         end
     end
@@ -768,7 +798,8 @@ function BasePlayer:SaveInventory()
                 refId = itemRefId,
                 count = tes3mp.GetInventoryItemCount(self.pid, i),
                 charge = tes3mp.GetInventoryItemCharge(self.pid, i),
-                enchantmentCharge = tes3mp.GetInventoryItemEnchantmentCharge(self.pid, i)
+                enchantmentCharge = tes3mp.GetInventoryItemEnchantmentCharge(self.pid, i),
+                soul = tes3mp.GetInventoryItemSoul(self.pid, i)
             }
         end
     end

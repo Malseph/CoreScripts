@@ -148,6 +148,17 @@ function SaveBanList()
     jsonInterface.save("banlist.json", banList)
 end
 
+function LoadDynamicRecords()
+    tes3mp.LogMessage(2, "Reading dynamicRecords.json")
+    dynamicRecords = jsonInterface.load("world/dynamicRecords.json")
+	
+	tableHelper.fixNumericalKeys(dynamicRecords.data)
+end
+
+function SaveDynamicRecords()
+	jsonInterface.save("world/dynamicRecords.json", dynamicRecords)
+end
+
 function LoadPluginList()
     tes3mp.LogMessage(2, "Reading pluginlist.json")
 
@@ -214,7 +225,7 @@ end
 
 function OnServerInit()
 
-    local expectedVersionPrefix = "0.6.2"
+    local expectedVersionPrefix = "0.6.3"
     local serverVersion = tes3mp.GetServerVersion()
 
     if string.sub(serverVersion, 1, string.len(expectedVersionPrefix)) ~= expectedVersionPrefix then
@@ -227,6 +238,7 @@ function OnServerInit()
     myMod.PushPlayerList(Players)
 
     LoadBanList()
+	LoadDynamicRecords()					 
     LoadPluginList()
 
     tes3mp.SetPluginEnforcementState(config.enforcePlugins)
@@ -1090,6 +1102,10 @@ function OnPlayerBook(pid)
     myMod.OnPlayerBook(pid)
 end
 
+function OnPlayerDynamicRecord(pid)
+    myMod.OnPlayerDynamicRecord(pid)
+end
+
 function OnPlayerEndCharGen(pid)
     myMod.OnPlayerEndCharGen(pid)
 end
@@ -1160,4 +1176,8 @@ end
 
 function OnMpNumIncrement(currentMpNum)
     myMod.OnMpNumIncrement(currentMpNum)
+end
+
+function OnPlayerInteract(pid, targetPid, sneaking)
+	myMod.OnPlayerInteract(pid, targetPid, sneaking)
 end

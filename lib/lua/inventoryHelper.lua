@@ -1,25 +1,25 @@
 local inventoryHelper = {};
 
-function inventoryHelper.containsItem(inventory, refId, charge)
+function inventoryHelper.containsItem(inventory, refId, charge, soul)
     for itemIndex, item in pairs(inventory) do
         if item.refId == refId then
-            if charge == nil then
-                return true
-            elseif item.charge == charge then
-                return true
+            if charge == nil or charge == item.charge then
+                if soul == nil or string.len(soul) == 0 or soul == item.soul then
+                    return true
+                end
             end
         end
     end
     return false
 end
 
-function inventoryHelper.getItemIndex(inventory, refId, charge)
+function inventoryHelper.getItemIndex(inventory, refId, charge, soul)
     for itemIndex, item in pairs(inventory) do
         if item.refId == refId then
-            if charge == nil then
-                return itemIndex
-            elseif item.charge == charge then
-                return itemIndex
+            if charge == nil or charge == item.charge then
+                if soul == nil or string.len(soul) == 0 or soul == item.soul then
+                    return itemIndex
+                end
             end
         end
     end
