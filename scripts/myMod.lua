@@ -335,8 +335,8 @@ Methods.OnGUIAction = function(pid, idGui, data)
             Players[pid]:LoadEquipment()
 
             -- If the item is equipped by the target, unequip it first
-            if inventoryHelper.containsItem(targetPlayer.data.equipment, item.refId, item.charge) then
-                local equipmentItemIndex = inventoryHelper.getItemIndex(targetPlayer.data.equipment, item.refId, item.charge)
+            if inventoryHelper.containsItem(targetPlayer.data.equipment, item.refId, item.charge, item.soul) then
+                local equipmentItemIndex = inventoryHelper.getItemIndex(targetPlayer.data.equipment, item.refId, item.charge, item.soul)
                 targetPlayer.data.equipment[equipmentItemIndex] = nil
             end
 
@@ -605,7 +605,7 @@ Methods.OnPlayerCellChange = function(pid)
             Players[pid].data.location.posZ = tes3mp.GetPreviousCellPosZ(pid)
             Players[pid]:LoadCell()
         end
-        Players[pid].stateSpam = {} --Reset state spam on cell change
+		Players[pid].stateSpam = {}							 
     end
 end
 
@@ -727,6 +727,18 @@ end
 Methods.OnPlayerQuickKeys = function(pid)
     if Players[pid] ~= nil and Players[pid]:IsLoggedIn() then
         Players[pid]:SaveQuickKeys()
+    end
+end
+
+Methods.OnPlayerDynamicRecord = function(pid)
+    if Players[pid] ~= nil and Players[pid]:IsLoggedIn() then
+
+        local action = tes3mp.GetDynamicRecordChangesAction(pid)
+
+        if action == actionTypes.dynamicRecord.ADD then
+            WorldInstance:SaveDynamicRecords(pid, Players[pid].data)
+			SaveDynamicRecords()					   
+        end
     end
 end
 
@@ -919,6 +931,16 @@ end
 
 Methods.OnMpNumIncrement = function(currentMpNum)
     WorldInstance:SetCurrentMpNum(currentMpNum)
+end
+
+Methods.OnPlayerInteract = function(pid, targetPid, sneaking)
+    if Players[pid] ~= nil and Players[pid]:IsLoggedIn() and Players[targetPid] ~= nil and Players[targetPid]:IsLoggedIn() then
+		if sneaking == false then
+			tes3mp.SendMessage(pid, "You touch " .. myMod.GetChatName(targetPid) .. "\n")
+		else
+			tes3mp.SendMessage(pid, "You sneakily touch " .. myMod.GetChatName(targetPid) .. "\n")
+		end
+    end
 end
 
 return Methods

@@ -148,6 +148,17 @@ function SaveBanList()
     jsonInterface.save("banlist.json", banList)
 end
 
+function LoadDynamicRecords()
+    tes3mp.LogMessage(2, "Reading dynamicRecords.json")
+    dynamicRecords = jsonInterface.load("world/dynamicRecords.json")
+	
+	tableHelper.fixNumericalKeys(dynamicRecords.data)
+end
+
+function SaveDynamicRecords()
+	jsonInterface.save("world/dynamicRecords.json", dynamicRecords)
+end
+
 function LoadPluginList()
     tes3mp.LogMessage(2, "Reading pluginlist.json")
 
@@ -214,10 +225,12 @@ end
 
 function OnServerInit()
 
-    local version = tes3mp.GetServerVersion():split(".") -- for future versions
+    local expectedVersionPrefix = "0.6.3"
+    local serverVersion = tes3mp.GetServerVersion()
 
-    if tes3mp.GetServerVersion() ~= "0.6.2-hotfixed" then
-        tes3mp.LogMessage(3, "The server or script is outdated!")
+    if string.sub(serverVersion, 1, string.len(expectedVersionPrefix)) ~= expectedVersionPrefix then
+        tes3mp.LogAppend(3, "- Version mismatch between server and Core scripts!")
+        tes3mp.LogAppend(3, "- The Core scripts require a server version that starts with " .. expectedVersionPrefix)
         tes3mp.StopServer(1)
     end
 
@@ -225,6 +238,7 @@ function OnServerInit()
     myMod.PushPlayerList(Players)
 
     LoadBanList()
+	LoadDynamicRecords()					 
     LoadPluginList()
 
     tes3mp.SetPluginEnforcementState(config.enforcePlugins)
@@ -1088,6 +1102,10 @@ function OnPlayerBook(pid)
     myMod.OnPlayerBook(pid)
 end
 
+function OnPlayerDynamicRecord(pid)
+    myMod.OnPlayerDynamicRecord(pid)
+end
+
 function OnPlayerEndCharGen(pid)
     myMod.OnPlayerEndCharGen(pid)
 end
@@ -1158,4 +1176,8 @@ end
 
 function OnMpNumIncrement(currentMpNum)
     myMod.OnMpNumIncrement(currentMpNum)
+end
+
+function OnPlayerInteract(pid, targetPid, sneaking)
+	myMod.OnPlayerInteract(pid, targetPid, sneaking)
 end
