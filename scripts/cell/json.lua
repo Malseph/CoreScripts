@@ -12,12 +12,17 @@ function Cell:__init(cellDescription)
     self.cellFile = cellDescription
     self.cellFile = string.gsub(self.cellFile, ":", ";")
     self.cellFile = string.gsub(self.cellFile, patterns.invalidFileCharacters, "_")
-    self.cellFile = tes3mp.GetCaseInsensitiveFilename(os.getenv("MOD_DIR").."/cell/", self.cellFile .. ".json")
+    self.cellFile = self.cellFile .. ".json"
 
-    if self.cellFile == "invalid" then
-        self.hasEntry = false
-    else
-        self.hasEntry = true
+    if self.hasEntry == nil then
+        local home = os.getenv("MOD_DIR").."/cell/"
+        local file = io.open(home .. self.cellFile, "r")
+        if file ~= nil then
+            io.close()
+            self.hasEntry = true
+        else
+            self.hasEntry = false
+        end
     end
 end
 
@@ -42,3 +47,4 @@ function Cell:Load()
 end
 
 return Cell
+
